@@ -126,12 +126,56 @@ p_atmost_z <- pnorm(z_score, 0, 1)
   Using R, we get $P(Z < `r round(z_score,digits = 3)`)$ = `r round(p_atmost_z, digits = 3)`.  
   Therefore, the probability that the sample mean for blood pressure of 50 males between 20 and 29 years old will be less than 125.0 is `r round(p_atmost_z, digits = 3)`. \
   
-b) What is the 90th percentile of the sampling distribution of the sample mean X for a sample size of 40?
+c) What is the 90th percentile of the sampling distribution of the sample mean X for a sample size of 40?
 ```{r}
-upper_limit = qnorm(0.90, mean = mu, sd = sd)
-```
+mu <- 128.0     
+sd <- 10.2       
+n <- 40      
 
+sem <- sd / sqrt(n)
+
+z_90 <- qnorm(0.90)
+
+nintieth_percentile <- mu + z_90 * sem
+```
+- The 90th percentile of the sampling distribution of the sample mean X for a sample size of 40 is `r round(nintieth_percentile, digits = 3)`.\
+
+## Problem 4 (12 points)
+
+Some researchers are interested in the mean pulse of young women suffering from fibromyalgia. They selected a random sample of 40 young females suffering from fibromyalgia. The sample mean of their pulses was 80 and the sample standard deviation was 10.\
+
+a) Compute the 95% confidence interval for the population mean pulse rate of young females suffering from fibromyalgia. 
+```{r}
+set.seed(2)
+sample_data = rnorm(n = 40, mean = 80, sd = 10)
+
+result <- t.test(sample_data)
+
+confidence_interval <- result$conf.int
+
+```
+- The 95% confidence interval for the population mean pulse rate of young females suffering from fibromyalgia is $(`r round(confidence_interval, digits =3)`)$. \
+
+b) Interpret the calculated confidence interval.
+- We are 95% confident that the true mean pulse rate of young females suffering from fibromyalgia is between `r round(confidence_interval, digits =3)[1]` and `r round(confidence_interval, digits =3)[2]`.\
+
+
+c) Suppose the researchers now want to test the null hypothesis that the mean pulse of young women suffering from fibromyalgia is equal to 70, against the alternative that the mean pulse is not equal to 70, at the $\sigma = 0.01$ significance level. Conduct this hypothesis test, and interpret the results.\
+- Here, $\mu$ = mean pulse of young women suffering from fibromyalgia. Since n>30, we can assume that the sampling distribution of the mean follows a normal distribution (Central Limit Theorem). \
+  $H_o: \mu = 70$\
+  $H_a: \mu \neq 70$\
+  We need to run a two-sided t-test based on the fact we we have sample mean and sample standard deviation only. 
+```{r}
+two_sided_t_result <- t.test(sample_data, 
+                 alternative = "two.sided")
+p_val <- two_sided_t_result$`p.value`
+```
   
+  The probability that the mean pulse of young women suffering from fibromyalgia is 70 given the null distribution is true is `r format(p_val, digits = 3)`. This is less than the significance level (0.01). Hence, we reject the null hypothesis. There is statistically significant evidence that the mean pulse of young women suffering from fibromyalgia is not equal to 70 beats per minute. 
+  
+  
+
+
   
   
 
