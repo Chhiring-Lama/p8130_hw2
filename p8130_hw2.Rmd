@@ -1,0 +1,139 @@
+---
+title: "p8130_hw2"
+author: "Chhiring Lama"
+date: "2024-10-10"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE, message = FALSE}
+library(tidyverse)
+library(ggplot2)
+library(ggthemes)
+```
+
+## Problem 1 (15 points)
+Suppose the probability of having at least one dental checkup during a two-year period is 73%. 56 random individuals are being studied for their health care utilization practices over a two-year period. Compute “part a” by hand and show key steps. For all other parts you may hand calculate or use R. \
+
+a) What is the probability that exactly 40 of these individuals will have at least one dental
+checkup?
+- ![]("problem_1a_solution.pdf")\
+
+b) What is the probability that at least 40 of these individuals will have at least one dental
+checkup?
+```{r}
+pdf_until_39 <- pbinom(39, 56, 0.73)
+```
+- Probability that at least 40 of them have at least 1 check up: $P(X \ge 40) = 1- P(X \le 39)$\
+  Using the formula $P(X \le x) = \sum_{x=o}^x {n \choose x}.(p)^x.(1-p)^{n-x}$, we have:\
+  $P(X \le 39) = \sum_{x=o}^{39} {56 \choose x}.(p)^x.(1-p)^{56-x}$ = $`r round(pdf_until_39, digits =3)`$\
+  
+  Hence, the probability of at least 40 of them having at least 1 check up is `r round(pdf_until_39, digits =3)`. \
+  
+c) Could you use an approximation method to calculate the probabilities above? If yes, calculate the probabilities using approximations and compare to exact values; otherwise, explain why approximation methods are not appropriate.\
+- No, we cannot use an approximation method to calculate the probabilities above because number of trials (n) is not large (usually > 100) and probability of success here is quite large (0.73).\
+
+d) How many individuals do you expect to have at least one dental checkup?
+```{r expected_val_for_discrete}
+prob = function(x){
+  pmf = dbinom(x, 56, 0.73)
+  x_times_pmf = x*pmf
+}
+x_val <- seq(from = 0, to = 56)
+all_x_times_pmf <- sapply(list(x_val), prob)
+
+expected_val_x <- sum(all_x_times_pmf)
+```
+
+- Expected number of individuals to have at least one dental checkup: $E(X)$. Using its formula $E(X) = \sum_{x=0}^n.x.P(X =x)$.\
+  In our case, we want to calculate $E(X) = \sum_{x=0}^{56}.x.P(X =x)$. For this we need p.m.f at each x values between 0 and 56. Using R code, $E(X) = `r expected_val_x`$. \
+  
+e) What is the standard deviation of the number of individuals who will have at least one dental checkup?
+```{r expected_val_for_discrete_xsq}
+prob_sqx = function(x){
+  pmf = dbinom(x, 56, 0.73)
+  x_sq_times_pmf = (x^2)*pmf
+}
+
+all_x_sq_times_pmf <- sapply(list(x_val), prob_sqx)
+
+expected_val_x_sq <- sum(all_x_sq_times_pmf)
+
+var = expected_val_x_sq - (expected_val_x^2)
+
+sd = sqrt(var)
+```
+- We know that the $E(x)$ is the population mean($\mu$) as well. To calculate the standard deviation, first we need the variance ($\sigma^2$).\
+  $\sigma^2 = E(X^2) - E(X)^2$. From $d)$, we know that $E(X) = `r expected_val_x`$. Using R, we find that $E(X^2) = `r expected_val_x_sq`$, $\sigma^2 = `r round(var, digits = 3)`$ and $\sigma = \sqrt{\sigma^2} = `r round(sd, digits = 3)`$.\
+  So, the standard deviation of the number of individuals who will have at least one dental check up is `r round(sd, digits = 3)`.\
+  
+## Problem 2 (9 points)
+
+Suppose the number of tornadoes in the United States follows a Poisson distribution with parameter $\lambda = 6$ tornadoes per year. Compute using tables or R. Show the formula for "part a" (it can be handwritten and embedded in the pdf file).\
+
+a) What is the probability of having fewer than 3 tornadoes in the United States next year?\
+- ![]("problem_2a_solution.pdf")\
+
+b) What is the probability of having exactly 3 tornadoes in the United States next year?\
+```{r}
+prob_exactly_3 <- dpois(3, 6)
+```
+- The probability of having exactly 3 tornadoes in the next year is denoted by $P(X = 3)$. Using the formula  $P(X = x) = \frac{\lambda ^x.e^{-\lambda}}{x!}$,\
+  $P(X = 3) = \frac{6^3.e^{-6}}{3!} = `r round(prob_exactly_3, digits = 3)`$.\
+  The probability of having exactly 3 tornadoes in the next year in the USA is `r round(prob_exactly_3, digits = 3)`. 
+  
+c) What is the probability of having more than 3 tornadoes in the United States next year?
+```{r}
+prob_atmost_3 <- ppois(3, 6)
+prob_morethan_3 <- 1 - prob_atmost_3
+```
+- The probability of having more than 3 tornadoes next year $(P(X > 3) = 1 - P(X \le 3))$. \
+  $P(X \le 3) = \sum_{x=0}^3\frac{6 ^3.e^{-6}}{3!}$ = `r round(prob_atmost_3, digits = 3)`. \
+  $P(X > 3) = 1 - `r round(prob_atmost_3, digits = 3)` = `r round(prob_morethan_3 , digits = 3)`$. \
+  Hence, the probability of having more than 3 tornadoes next year in the United States is `r round(prob_morethan_3 , digits = 3)`. 
+  
+## Problem 3 (12 points)
+Assume the systolic blood pressure of 20-29 year old American males is normally distributed with population mean 128.0 and population standard deviation 10.2. \
+
+a) What is the probability that a randomly selected American male between 20 and 29 years old has a systolic blood pressure above 137.0?\
+```{r}
+x = 137.0
+mu = 128.0
+sd = 10.2
+p_atmost_x <- pnorm(x, mu, sd)
+p_lessthan_x <- 1 - p_atmost_x
+```
+- Here, the population mean systolic blood pressure $(\mu)$ = 128.0 and population standard deviation $(\sigma)$ = 10.2
+  P(Systolic\ blood\ pressure > 137.0) = $P(X > 137.0) = 1 - P(X \le 137.0)$ \
+  We can calculate c.d.f where for a $X \sim N(128.0, 10.2)$, $f(x) = P(X \le x)$ = $\int_{-\infty}^{x} f(x) dx$ = 
+  $\int_{-\infty}^{x} \frac{1}{\sigma\sqrt{2\pi}}.{\frac{-(x-\mu)^{2}}{2\sigma^2}} dx$.\
+  
+  $P(X \le 137.0)$ = $\int_{-\infty}^{137.0} \frac{1}{10.2\sqrt{2\pi}}.{\frac{-(137.0-128.0)^{2}}{2*10.2^2}} dx$ = $`r round(p_atmost_x, digits = 3)`$. \
+  
+  So, $P(Z > 137.0)$ = 1 - $P(X \le 137.0)$ = 1 - $`r round(p_atmost_x, digits = 3)`$ = $`r round(p_lessthan_x, digits = 3)`$.\
+  The probability that a randomly selected American male between 20 and 29 years old has a systolic blood pressure above 137.0 is $`r round(p_lessthan_x, digits = 3)`$. 
+
+b) What is the probability that the sample mean for blood pressure of 50 males between 20 and 29 years old will be less than 125.0?
+```{r}
+x_bar = 125.0
+n = 50
+z_score <- (x_bar-mu)/(sd/sqrt(n))
+
+p_atmost_z <- pnorm(z_score, 0, 1)
+```
+- Here, we have 50 males (n = 50), and their blodd pressure measure is normally distribute. First, we can get a standardized random variable (Z) corresponding to this mean using $\frac{(\bar X-\mu)}{\frac{\sigma}{\sqrt n}}$, Z = `r round(z_score, digits = 3)`. 
+  Using R, we get $P(Z < `r round(z_score,digits = 3)`)$ = `r round(p_atmost_z, digits = 3)`.  
+  Therefore, the probability that the sample mean for blood pressure of 50 males between 20 and 29 years old will be less than 125.0 is `r round(p_atmost_z, digits = 3)`. \
+  
+b) What is the 90th percentile of the sampling distribution of the sample mean X for a sample size of 40?
+```{r}
+upper_limit = qnorm(0.90, mean = mu, sd = sd)
+```
+
+  
+  
+  
+
+
+  
